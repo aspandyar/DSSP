@@ -19,30 +19,32 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Serve the uploaded files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// Use the upload middleware to handle the file upload
-app.post('/upload', upload.single('fragment'), (req, res) => {
-    const fragmentId = req.body.id;
-
-    // Log the request body to a file for debugging
-    fs.appendFile('request_log.txt', JSON.stringify(req.body) + '\n', (err) => {
-        if (err) {
-            console.error('Error writing to log file:', err);
+app.post('/upload', (req, res, next) => {
+    upload.single('fragment')(req, res, (err) => {
+        if (err) return next(err); // Handle multer errors
+        
+        const fragmentId = req.body.id;
+        if (!fragmentId) {
+            return res.status(400).send('Fragment ID is required.');
         }
+
+        // Log the request body to a file for debugging
+        fs.appendFile('request_log.txt', JSON.stringify(req.body) + '\n', (err) => {
+            if (err) {
+                console.error('Error writing to log file:', err);
+            }
+        });
+
+        const filename = `fragment_${fragmentId}.enc`;
+        fs.rename(req.file.path, `uploads/${filename}`, (renameErr) => {
+            if (renameErr) {
+                return res.status(500).send('Error renaming the file.');
+            }
+            res.send(`File uploaded as ${filename}. Request body: ${JSON.stringify(req.body)}`);
+        });
     });
-
-    if (!fragmentId) {
-        return res.status(400).send('Fragment ID is required.'); 
-    }
-
-    if (!req.file) {
-        return res.status(400).send('No file uploaded.');
-    }
-
-    res.send(`File uploaded as fragment_${fragmentId}.enc`);
 });
+
 
 // GET endpoint to download a fragment
 app.get('/uploads/:filename', (req, res) => {

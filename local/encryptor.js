@@ -50,6 +50,8 @@ async function uploadFragment(fragmentPath, fragmentId) {
         headers: formData.getHeaders(),
     });
 
+    console.log(response.data);
+
     return response.status;
 }
 
