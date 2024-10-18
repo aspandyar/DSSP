@@ -31,7 +31,9 @@
     "safer-buffer": "^2.1.2"
   },
   "devDependencies": {
+    "@nomicfoundation/hardhat-ignition": "^0.15.6",
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "chai": "^4.5.0",
     "eslint": "^9.12.0",
     "hardhat": "^2.22.13",
     "prettier": "^3.3.3",
@@ -39,8 +41,8 @@
   },
   "scripts": {
     "compile": "npx hardhat compile",
-    "test": "npx hardhat test",
-    "deploy": "npx hardhat ignition deploy ./ignition/modules/ignition.js --network localhost",
+    "test": "REPORT_GAS=true npx hardhat test",
+    "deploy": "npx hardhat ignition deploy ./ignition/modules/StorageSharing.js --network localhost",
     "node": "npx hardhat node"
   },
   "repository": {
