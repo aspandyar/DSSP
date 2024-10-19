@@ -4,13 +4,14 @@
 const { buildModule } = require("@nomicfoundation/hardhat-ignition/modules");
 
 module.exports = buildModule("StorageSharingModule", (m) => {
+  const priceInWeiPerByte = m.getParameter("priceInWeiPerByte", 1n);
   const StorageSharingContract = m.contract(
     "StorageSharing",
-    [], 
+    [priceInWeiPerByte],
     {},
   );
 
-  console.log(StorageSharingContract);
+  //console.log(StorageSharingContract);
 
   return { StorageSharingContract };
 });
