@@ -41,12 +41,47 @@ describe("StorageSharing", function () {
 
           const tx = await storageSharing.publishServer(socket);
           await expect(tx).to.emit(storageSharing, "ServerCreated").withArgs(0);
+
+          const servers = await storageSharing.listServers();
+          const server = await storageSharing.getServer(0);
+          const [serverOwner, serverSocket] = server;
+
+          await expect(servers).to.have.lengthOf(1);
+          await expect(serverOwner).to.equal(owner.address).and.to.equal(servers[0][0]);
+          await expect(serverSocket).to.equal(socket).and.to.equal(servers[0][1]);
       });
 
       it("Should revert if the socket is empty", async function () {
           const { storageSharing } = await loadFixture(deployStorageSharingFixture);
 
           await expect(storageSharing.publishServer("")).to.be.revertedWith("Socket is required");
+      });
+  });
+
+  describe("File Storage Bought", function () {
+      it("Should buy storage", async function() {
+          const { storageSharing, socket, owner, otherAccount } = await loadFixture(deployStorageSharingFixture);
+          const priceInWeiPerByte = 1n;
+
+          const file = {
+              id: 0,
+              size: 1000n,
+              name: "file.txt",
+              serverIds: [0, 0],
+              blockHashes: [0x12345, 0x67890],
+
+              user: otherAccount.address,
+          }
+
+          await storageSharing.publishServer(socket);
+
+          await storageSharing.buyStorage(Object.values(file), { value: 1000 });
+
+          const fileMetadatas = await storageSharing.listFileMetadatas(otherAccount.address);
+          const fileMetadata = await storageSharing.getFileMetadata(0);
+
+          await expect(fileMetadatas).to.have.lengthOf(1);
+          await expect(fileMetadata[0]).to.equal(fileMetadatas[0][0]);
       });
   });
 });
