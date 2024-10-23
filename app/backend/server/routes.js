@@ -44,13 +44,23 @@ router.get('/:id', async (req, res) => {
 });
 
 router.post('/listFiles', async (req, res) => {
-    const userAddress = req.body.user1;
+    const userAddress = req.body.user;
+    const fromAddress = req.body.from;
 
-    console.log(userAddress); 
+    console.log("User Address:", userAddress); 
+    console.log("From Address:", fromAddress); 
 
     try {
-        const files = await StorageSharing.methods.listFileMetadatas(userAddress).call({ from: req.body.from });
-        res.json({ files });
+        const files = await StorageSharing.methods.listFileMetadatas(userAddress).call({ from: fromAddress });
+        const filesResponse = files.map(file => ({
+            id: file.id.toString(),
+            size: file.size.toString(),
+            serverIds: file.serverIds.map(id => id.toString()),
+            blockHashes: file.blockHashes.map(hash => hash.toString()),
+            name: file.name, 
+            user: file.user
+        }));
+        res.json({ filesResponse });
     } catch (error) {
         console.log(error, userAddress);
         res.status(500).json({ error: error.message });
@@ -60,7 +70,7 @@ router.post('/listFiles', async (req, res) => {
 router.post('/buyStorage', async (req, res) => {
     const { size, name, serverIds, blockHashes, id, user, value } = req.body;
 
-    if (!size || !name || !serverIds || !blockHashes || !id || !user ) {
+    if (!size || !name || !serverIds || !blockHashes  || !user ) {
         return res.status(400).json({ error: "All fields are required." });
     }
 
