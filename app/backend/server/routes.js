@@ -2,23 +2,11 @@ const express = require('express');
 const router = express.Router();
 const { StorageSharing } = require('../blockchain/web3');
 
-router.get('/hello', (req, res) => {
-    try {
-        res.json({ message: 'Hello, World!' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
 router.post('/public', async (req, res) => {
-    const { socket } = req.body;
-
-    if (!socket) {
-        return res.status(400).json({ error: 'Socket is required' });
-    }
+    const { socket, from } = req.body;
 
     try {
-        const tx = await StorageSharing.methods.publishServer(socket).send({ from: req.body.from });
+        const tx = await StorageSharing.methods.publishServer(socket).send({ from: from });
         res.json({ transactionHash: tx.transactionHash });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -58,8 +46,10 @@ router.post('/listFiles', async (req, res) => {
             serverIds: file.serverIds.map(id => id.toString()),
             blockHashes: file.blockHashes.map(hash => hash.toString()),
             name: file.name, 
+
             user: file.user
         }));
+
         res.json({ filesResponse });
     } catch (error) {
         console.log(error, userAddress);
@@ -67,12 +57,28 @@ router.post('/listFiles', async (req, res) => {
     }
 });
 
-router.post('/buyStorage', async (req, res) => {
-    const { size, name, serverIds, blockHashes, id, user } = req.body;
+router.get('/file/:id', async (req, res) => {
+    try {
+        const file = await StorageSharing.methods.getFileMetadata(req.params.id).call();
 
-    if (!size || !name || !serverIds || !blockHashes ) {
-        return res.status(400).json({ error: "All fields are required." });
+        fileSerialized = {
+            id: file.id.toString(),
+            size: file.size.toString(),
+            serverIds: file.serverIds.map(id => id.toString()),
+            blockHashes: file.blockHashes.map(hash => hash.toString()),
+            name: file.name,
+
+            user: file.user
+        };
+
+        res.json({ fileSerialized });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
+});
+
+router.post('/buyStorage', async (req, res) => {
+    const { size, name, serverIds, blockHashes, id, from } = req.body;
 
     const fileMetadata = {
         id,
@@ -80,13 +86,14 @@ router.post('/buyStorage', async (req, res) => {
         name,
         serverIds,
         blockHashes,
-        user
+
+        user: from
     };
 
     totalCost = size;
 
     try {
-        const tx = await StorageSharing.methods.buyStorage(fileMetadata).send({ from: user, value: totalCost });
+        const tx = await StorageSharing.methods.buyStorage(fileMetadata).send({ from: from, value: totalCost });
         res.json({ transactionHash: tx.transactionHash });
     } catch (error) {
         console.error("Error during buyStorage:", error);
