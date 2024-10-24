@@ -68,9 +68,9 @@ router.post('/listFiles', async (req, res) => {
 });
 
 router.post('/buyStorage', async (req, res) => {
-    const { size, name, serverIds, blockHashes, id, user, value } = req.body;
+    const { size, name, serverIds, blockHashes, id, user } = req.body;
 
-    if (!size || !name || !serverIds || !blockHashes  || !user ) {
+    if (!size || !name || !serverIds || !blockHashes ) {
         return res.status(400).json({ error: "All fields are required." });
     }
 
@@ -80,13 +80,13 @@ router.post('/buyStorage', async (req, res) => {
         name,
         serverIds,
         blockHashes,
-        value
+        user
     };
 
     totalCost = size;
 
     try {
-        const tx = await StorageSharing.methods.buyStorage(Object.values(fileMetadata)).send({ from: user, value: totalCost });
+        const tx = await StorageSharing.methods.buyStorage(fileMetadata).send({ from: user, value: totalCost });
         res.json({ transactionHash: tx.transactionHash });
     } catch (error) {
         console.error("Error during buyStorage:", error);
