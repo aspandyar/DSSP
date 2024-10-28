@@ -11,7 +11,7 @@ const publishServer = async (socket) => {
 };
 
 async function main() {
-    const socket = "http://127.0.0.1:3000";
+    const socket = "http://127.0.0.1:3002";
     await publishServer(socket);
 }
 
