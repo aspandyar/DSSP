@@ -13,7 +13,7 @@ const Home = () => {
             <Container>
                 <Row className="mb-4">
                     <Col>
-                        <h2>Motivation</h2>
+                        <h2 className='mx-2'>Motivation</h2>
                         <ListGroup>
                             <ListGroup.Item>Reduce costs associated with centralized cloud storage services.</ListGroup.Item>
                             <ListGroup.Item>Promote resource sharing by utilizing underutilized storage space.</ListGroup.Item>
@@ -24,7 +24,7 @@ const Home = () => {
 
                 <Row className="mb-4">
                     <Col>
-                        <h2>Core Features</h2>
+                        <h2 className='mx-2'>Core Features</h2>
                         <Row>
                             <Col md={4}>
                                 <Card>
@@ -65,7 +65,7 @@ const Home = () => {
 
                 <Row className="mb-4">
                     <Col>
-                        <h2>Additional Features</h2>
+                        <h2 className='mx-2'>Additional Features</h2>
                         <ListGroup>
                             <ListGroup.Item>Automated Backup & Redundancy</ListGroup.Item>
                             <ListGroup.Item>Version Control</ListGroup.Item>
@@ -75,7 +75,7 @@ const Home = () => {
 
                 <Row className="mb-4">
                     <Col>
-                        <h2>About the Platform</h2>
+                        <h2 className='mx-2'>About the Platform</h2>
                         <Card>
                             <Card.Body>
                                 <Card.Text>
@@ -89,7 +89,7 @@ const Home = () => {
 
                 <Row className="mb-4">
                     <Col>
-                        <h2>Examples of Centralized Products</h2>
+                        <h2 className='mx-2'>Examples of Centralized Products</h2>
                         <ListGroup>
                             <ListGroup.Item>Google Drive</ListGroup.Item>
                             <ListGroup.Item>Dropbox</ListGroup.Item>
@@ -98,12 +98,6 @@ const Home = () => {
                     </Col>
                 </Row>
 
-                <Row className="mb-4">
-                    <Col>
-                        <h2>Join Us!</h2>
-                        <Button variant="info">Sign Up Now</Button>
-                    </Col>
-                </Row>
             </Container>
         </div>
     );

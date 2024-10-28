@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, Card, Container } from 'react-bootstrap';
 import { uploadFile } from '../../api/fileManipulations';
 
-const FileUploadComponent = () => {
+const FileUpload = () => {
     const [file, setFile] = useState(null);
 
     const handleFileChange = (event) => {
@@ -33,4 +33,4 @@ const FileUploadComponent = () => {
     );
 };
 
-export default FileUploadComponent;
+export default FileUpload;

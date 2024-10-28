@@ -14,6 +14,7 @@ const Header = () => {
                         <Nav className="me-auto">
                             <Nav.Link as={Link} to="/counter">Counter</Nav.Link>
                             <Nav.Link as={Link} to="/file-upload">File Upload</Nav.Link>
+                            <Nav.Link as={Link} to="/file-download">File Download</Nav.Link>
                             <Nav.Link as={Link} to="/about">About</Nav.Link>
                         </Nav>
                         <LoginComponent />

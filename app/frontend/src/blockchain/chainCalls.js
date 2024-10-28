@@ -1,4 +1,4 @@
-const { StorageSharing } = require('../blockchain/web3');
+const { StorageSharing } = require('./web3');
 
 async function publishServer(socket, fromAddress) {
     try {

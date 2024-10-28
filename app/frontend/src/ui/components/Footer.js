@@ -1,12 +1,33 @@
 import React from 'react';
-import { Container } from 'react-bootstrap';
+import { Container, Row, Col } from 'react-bootstrap';
 
 const Footer = () => {
     return (
         <footer className="bg-dark text-light py-4">
             <Container className="text-center">
-                <p>© 2024 Decentralized Storage Sharing Platform. All rights reserved.</p>
-                <p>MIT License</p>
+                <Row>
+                    <Col>
+                        <p>© 2024 Decentralized Storage Sharing Platform. All rights reserved.</p>
+                        <p>MIT License</p>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                        <p>Contact Us: <a href="mailto:aspandyart@gmail.com" className="text-light">aspandyart@gmail.com</a></p>
+                    </Col>
+                    <Col>
+                        <p>
+                            <a 
+                                href="https://github.com/your-github-username" 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="text-light"
+                            >
+                                GitHub Repository
+                            </a>
+                        </p>
+                    </Col>
+                </Row>
             </Container>
         </footer>
     );
