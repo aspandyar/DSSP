@@ -3,6 +3,8 @@ import { Container, Row, Col } from 'react-bootstrap';
 
 const Footer = () => {
     return (
+      <>
+        <div className="flex-grow-1"></div>
         <footer className="bg-dark text-light py-4">
             <Container className="text-center">
                 <Row>
@@ -30,6 +32,7 @@ const Footer = () => {
                 </Row>
             </Container>
         </footer>
+      </>
     );
 };
 

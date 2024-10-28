@@ -11,6 +11,7 @@ import FileDownload from './ui/pages/FileDownload';
 
 const App = () => {
     return (
+       <div className="d-flex flex-column min-vh-100">
         <Router>
             <Header />
             <Container className="py-5">
@@ -23,6 +24,7 @@ const App = () => {
             </Container>
             <Footer />
         </Router>
+      </div>
     );
 };
 
