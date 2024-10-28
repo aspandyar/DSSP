@@ -50,7 +50,6 @@ function base64ToBlob(base64, type) {
     return new Blob([bytes], { type });
 }
 
-// Main function to handle file encryption and upload
 const uploadFile = async (file) => {
     try {
         const encryptionPublicKey = await getEncryptionPublicKey();
@@ -59,7 +58,7 @@ const uploadFile = async (file) => {
         formData.append('file', encryptedFile, file.name);
 
         const response = await fetch('http://192.168.1.29:8000/api/server/prepareFile', {
-            method: 'POST',
+            method: 'POST', 
             body: formData,
         });
 

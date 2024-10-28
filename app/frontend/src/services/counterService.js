@@ -1,5 +1,3 @@
-// src/services/counterService.js
-
 let count = 0;
 
 export const incrementCount = () => {
