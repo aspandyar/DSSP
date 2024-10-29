@@ -197,7 +197,7 @@ router.get("/downloadFile/:id", async (req, res) => {
         const socket = blockToSocket[numericHash];
         console.log(numericHash);
         const hash = "0x" + numericHash.toString(16);
-        const result = await axios.get(`${socket}/downloadBlock/${hash}`, { responseType: "arraybuffer" }).catch(console.error);
+        const result = await axios.get(`${socket}/downloadBlock/${hash}`, { responseType: "arraybuffer" });
 
         if (result.status !== 200) {
             return res.status(500).send("Error downloading block");
