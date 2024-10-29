@@ -12,8 +12,7 @@ contract StorageSharing {
     uint256 public priceInWeiPerByte;
     Server[] public servers;
     FileMetadata[] public fileMetadatas;
-    // Here index starts from 1, because 0 is the default value for missing keys
-    mapping(uint => uint) public fileMetadataIdByHash;
+    mapping(uint => string) public hashToSocket;
 
     struct Server {
         address payable owner;
@@ -86,9 +85,9 @@ contract StorageSharing {
             server.owner.transfer(totalCost / fileMetadata.serverIds.length);
         }
 
-        // Save index of fileMetadata
+        // Save index of sockets by hash
         for (uint i = 0; i < fileMetadata.blockHashes.length; i++) {
-            fileMetadataIdByHash[fileMetadata.blockHashes[i]] = fileMetadata.id + 1;
+            hashToSocket[fileMetadata.blockHashes[i]] = servers[fileMetadata.serverIds[i]].socket;
         }
 
         fileMetadatas.push(fileMetadata);

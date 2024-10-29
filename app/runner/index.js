@@ -17,8 +17,8 @@ const uploadBlock = async (req, res) => {
     const block = req.file.buffer.toString();
     if (!block) return res.status(400).send("Block data required");
 
-    const blockHash = crypto.createHash("sha256").update(block).digest("hex");
-    const metadataExists = await checkMetadataExists(parseInt(blockHash, 16));
+    const blockHash = "0x" + crypto.createHash("sha256").update(block).digest("hex");
+    const metadataExists = await checkMetadataExists(BigInt(blockHash));
 
     if (metadataExists) {
         const blockPath = `${process.env.BLOCKS_DIR}/${blockHash}`;
@@ -41,9 +41,9 @@ const downloadBlock = (req, res) => {
 };
 
 const checkMetadataExists = async (blockHash) => {
-    const metadataId = await storageContract.methods.fileMetadataIdByHash(blockHash).call();
-    console.log(metadataId);
-    return metadataId !== 0n;
+    console.log("Checking metadata for block hash:", blockHash, blockHash.toString(16));
+    const socket = await storageContract.methods.hashToSocket(blockHash).call();
+    return socket !== "";
 };
 
 app.get("/status", status);
