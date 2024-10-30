@@ -132,3 +132,4 @@ dist
 
 # blockchain abi
 app/backend/blockchain/StorageSharing.json
+app/frontend/src/blockchain/StorageSharing.json
