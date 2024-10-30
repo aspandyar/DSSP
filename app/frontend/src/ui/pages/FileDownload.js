@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Card, Container, ListGroup } from 'react-bootstrap';
 import Cookies from 'js-cookie';
-import { getServers, listFiles } from '../../blockchain/chainCalls';
+import { listServers, listFiles } from '../../blockchain/chainCalls';
 
 const FileDownload = () => {
     const [fileList, setFileList] = useState([]);
@@ -21,7 +21,7 @@ const FileDownload = () => {
 
             setAccount(storedAccount);
             try {
-                const servers = await getServers(storedAccount);
+                const servers = await listServers();
                 console.log("Servers:", servers);
                 setServerList(servers);
 
