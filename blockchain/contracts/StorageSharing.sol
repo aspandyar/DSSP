@@ -12,6 +12,7 @@ contract StorageSharing {
     uint256 public priceInWeiPerByte;
     Server[] public servers;
     FileMetadata[] public fileMetadatas;
+    mapping(uint => string) public hashToSocket;
 
     struct Server {
         address payable owner;
@@ -76,13 +77,19 @@ contract StorageSharing {
         uint totalCost = fileMetadata.size * priceInWeiPerByte;
         require(msg.value == totalCost, "Insufficient funds");
 
+        fileMetadata.id = fileMetadatas.length;
+
         // Pay for owner of each server
         for (uint i = 0; i < fileMetadata.serverIds.length; i++) {
             Server memory server = servers[fileMetadata.serverIds[i]];
             server.owner.transfer(totalCost / fileMetadata.serverIds.length);
         }
 
-        fileMetadata.id = fileMetadatas.length;
+        // Save index of sockets by hash
+        for (uint i = 0; i < fileMetadata.blockHashes.length; i++) {
+            hashToSocket[fileMetadata.blockHashes[i]] = servers[fileMetadata.serverIds[i]].socket;
+        }
+
         fileMetadatas.push(fileMetadata);
     }
 }
