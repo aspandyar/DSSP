@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from 'react-bootstrap';
-import { ethers } from 'ethers';
 import Cookies from 'js-cookie';
 
 const LoginComponent = () => {
@@ -20,8 +19,9 @@ const LoginComponent = () => {
                 const currentAccount = accounts[0];
 
                 setAccount(currentAccount);
+                Cookies.set('account', currentAccount, { expires: 7 });
 
-                Cookies.set('account', currentAccount, { expires: 7 }); // expires in 7 days
+                window.location.reload();
             } catch (error) {
                 console.error("User denied account access:", error);
             }
@@ -33,6 +33,7 @@ const LoginComponent = () => {
     const handleLogout = () => {
         setAccount(null);
         Cookies.remove('account');
+        window.location.reload(); 
     };
 
     return (

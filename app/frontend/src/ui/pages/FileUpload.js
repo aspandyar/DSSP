@@ -1,22 +1,63 @@
-import React, { useState } from 'react';
-import { Button, Card, Container } from 'react-bootstrap';
-import { uploadFile } from '../../api/fileManipulations';
+import React, { useState, useEffect } from 'react';
+import { Button, Card, Container, Alert } from 'react-bootstrap';
+import Cookies from 'js-cookie';
+import { prepareFile } from '../../api/fileManipulations';
+import { buyStorage } from '../../blockchain/chainCalls';
 
 const FileUpload = () => {
+    const [account, setAccount] = useState(null);
+    const [error, setError] = useState(null);
     const [file, setFile] = useState(null);
+    const [showError, setShowError] = useState(false);
+    const [successMessage, setSuccessMessage] = useState(null);
+
+    useEffect(() => {
+        const savedAccount = Cookies.get('account');
+        if (savedAccount) {
+            setAccount(savedAccount);
+            setError(null);
+        } else {
+            setError("Error: User is not authenticated.");
+        }
+    }, []);
 
     const handleFileChange = (event) => {
         setFile(event.target.files[0]);
     };
 
     const handleUpload = async () => {
-        if (!file) return;
+        if (!account) {
+            setError("You are not authenticated!");
+            setShowError(true); 
+            return;
+        }
+
+        if (!file) {
+            setError("File not selected or already uploaded!");
+            setShowError(true); 
+            return;
+        }
 
         try {
-            const result = await uploadFile(file);
-            console.log(result);
+            const result = await prepareFile(file);
+
+            const chainResponse = await buyStorage(
+                file.size,
+                file.name,
+                result.serverIds,
+                result.blockHashes,
+                result.id,
+                account
+            );
+
+            setError(null);
+            setShowError(false);
+            setSuccessMessage(`File uploaded successfully! Storage Hash: ${chainResponse}`);
+            setFile(null); 
         } catch (error) {
-            console.error('File upload failed:', error);
+            setError("Error: " + error.message);
+            setShowError(true); 
+            setSuccessMessage(null);
         }
     };
 
@@ -25,7 +66,13 @@ const FileUpload = () => {
             <Card>
                 <Card.Body>
                     <Card.Title>File Upload</Card.Title>
-                    <input type="file" onChange={handleFileChange} />
+                    {showError && error && <Alert variant="danger">{error}</Alert>}
+                    {successMessage && <Alert variant="success">{successMessage}</Alert>}
+                    <input 
+                        type="file" 
+                        onChange={handleFileChange} 
+                        accept="*/*" // Limit accepted file types
+                    />
                     <Button variant="primary" onClick={handleUpload}>Upload File</Button>
                 </Card.Body>
             </Card>

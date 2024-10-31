@@ -9,10 +9,6 @@ import contractABI from './StorageSharing.json'; // Adjust the path as necessary
 const hardhatUrl = process.env.REACT_APP_HARDHAT_URL;
 const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
 
-console.log("Hardhat URL:", hardhatUrl);
-console.log("Contract Address:", contractAddress);
-console.log("All environment variables:", process.env);
-
 const web3 = new Web3(hardhatUrl);
 
 const StorageSharing = new web3.eth.Contract(contractABI.abi, contractAddress);

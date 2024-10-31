@@ -68,15 +68,25 @@ async function getFileMetadata(id) {
 }
 
 async function buyStorage(size, name, serverIds, blockHashes, id, fromAddress) {
-    const fileMetadata = { id, size, name, serverIds, blockHashes, user: fromAddress };
-    const totalCost = size;
-
     try {
-        const tx = await StorageSharing.methods.buyStorage(fileMetadata).send({ from: fromAddress, value: totalCost });
-        console.log("Transaction Hash:", tx.transactionHash);
+        const fileMetadata = {
+            id: 0,
+            size: size,
+            name: name,
+            serverIds: serverIds,
+            blockHashes: blockHashes,
+            user: fromAddress,
+        };
+
+        const pricePerByte = await StorageSharing.methods.priceInWeiPerByte().call();
+        const totalCost = size * Number(pricePerByte);
+
+        const tx = await StorageSharing.methods.buyStorage(fileMetadata).send({ 
+            from: fromAddress, 
+            value: totalCost 
+        });
         return tx.transactionHash;
     } catch (error) {
-        console.error("Error buying storage:", error);
         throw error;
     }
 }
