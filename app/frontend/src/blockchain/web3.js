@@ -1,6 +1,7 @@
 import React, { createContext, useEffect, useState } from 'react';
 import Web3 from 'web3';
 import contractABI from './StorageSharing.json';
+import * as chainCalls from './chainCalls';
 
 const Web3Context = createContext();
 
@@ -42,59 +43,73 @@ const Web3Provider = ({ children }) => {
     initWeb3();
   }, []);
 
-  const buyStorage = async (size, name, serverIds, blockHashes) => {
-    if (!contract || !account) {
-      throw new Error("Contract or account not initialized.");
-    }
-
+  const handleBuyStorage = async (size, name, serverIds, blockHashes) => {
     try {
-      const pricePerByte = await contract.methods.priceInWeiPerByte().call();
-      const totalCost = size * Number(pricePerByte); 
-
-      const fileMetadata = {
-        id: 0,
-        size,
-        name,
-        serverIds,
-        blockHashes,
-        user: account,
-      };
-
-      
-      const gasLimit = await contract.methods.buyStorage(fileMetadata).estimateGas({
-        from: account,
-        value: totalCost.toString(), 
-      });
-
-      
-      const gasPrice = await web3.eth.getGasPrice();
-
-      const transactionParams = {
-        to: contract.options.address,
-        from: account,
-        value: totalCost.toString(),
-        data: contract.methods.buyStorage(fileMetadata).encodeABI(),
-        gas: gasLimit.toString(),
-        gasPrice: gasPrice.toString(),
-      };
-
-      console.log("Transaction Params:", transactionParams);
-
-      const receipt = await window.ethereum.request({
-        method: 'eth_sendTransaction',
-        params: [transactionParams],
-      });
-
-      return receipt;
+      return await chainCalls.buyStorage(contract, account, size, name, serverIds, blockHashes);
     } catch (error) {
-      console.error("Error buying storage:", error);
       setError(`Error buying storage: ${error.message}`);
       throw error;
     }
   };
 
+  const handlePublishServer = async (socket) => {
+    try {
+      return await chainCalls.publishServer(contract, account, socket);
+    } catch (error) {
+      setError(`Error publishing server: ${error.message}`);
+      throw error;
+    }
+  };
+
+  const handleListServers = async () => {
+    try {
+      return await chainCalls.listServers(contract);
+    } catch (error) {
+      setError(`Error listing servers: ${error.message}`);
+      throw error;
+    }
+  };
+
+  const handleGetServer = async (id) => {
+    try {
+      return await chainCalls.getServer(contract, id);
+    } catch (error) {
+      setError(`Error getting server: ${error.message}`);
+      throw error;
+    }
+  };
+
+  const handleListFiles = async (userAddress) => {
+    try {
+      return await chainCalls.listFiles(contract, account, userAddress);
+    } catch (error) {
+      setError(`Error listing files: ${error.message}`);
+      throw error;
+    }
+  };
+
+  const handleGetFileMetadata = async (id) => {
+    try {
+      return await chainCalls.getFileMetadata(contract, id);
+    } catch (error) {
+      setError(`Error getting file metadata: ${error.message}`);
+      throw error;
+    }
+  };
+
   return (
-    <Web3Context.Provider value={{ web3, account, contract, buyStorage, error }}>
+    <Web3Context.Provider value={{ 
+      web3, 
+      account, 
+      contract, 
+      buyStorage: handleBuyStorage, 
+      publishServer: handlePublishServer, 
+      listServers: handleListServers, 
+      getServer: handleGetServer, 
+      listFiles: handleListFiles, 
+      getFileMetadata: handleGetFileMetadata, 
+      error 
+    }}>
       {children}
       {error && <div className="error-message">{error}</div>}
     </Web3Context.Provider>
