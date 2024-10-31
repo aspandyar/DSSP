@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Button, Card, Container, Alert } from 'react-bootstrap';
 import Cookies from 'js-cookie';
-import { prepareFile } from '../../api/fileManipulations';
+import { prepareFile, uploadFile } from '../../api/fileManipulations';
 import { Web3Context } from '../../blockchain/web3';
 
 const FileUpload = () => {
@@ -49,12 +49,14 @@ const FileUpload = () => {
                 result.blockHashes
             );
 
+            await uploadFile(file);
+
             setError(null);
             setShowError(false);
             setSuccessMessage(`File uploaded successfully! Storage Hash: ${chainResponse}`);
             setFile(null); 
         } catch (error) {
-            setError("Error: " + error.message);
+            setError(error.message);
             setShowError(true); 
             setSuccessMessage(null);
         }

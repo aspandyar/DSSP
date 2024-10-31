@@ -1,4 +1,4 @@
-  export const buyStorage = async (contract, account, size, name, serverIds, blockHashes) => {
+export const buyStorage = async (contract, account, size, name, serverIds, blockHashes) => {
     if (!contract || !account) throw new Error("Contract or account not initialized.");
   
     try {
@@ -13,16 +13,18 @@
         blockHashes,
         user: account,
       };
-  
-      const response = await contract.methods.buyStorage(fileMetadata, totalCost).send({ from: account, value: totalCost });
+
+      const response = await contract.methods.buyStorage(fileMetadata).send({ from: account, value: totalCost });
+
+      console.log(response)
       return response.transactionHash;
     } catch (error) {
       console.error("Error buying storage:", error);
       throw error;
     }
-  };
-  
-  export const publishServer = async (contract, account, socket) => {
+};
+
+export const publishServer = async (contract, account, socket) => {
     if (!contract || !account) throw new Error("Contract or account not initialized.");
   
     try {
@@ -32,7 +34,7 @@
       console.error("Error publishing server:", error);
       throw error;
     }
-  };
+};
   
   export const listServers = async (contract) => {
     if (!contract) throw new Error("Contract not initialized.");
