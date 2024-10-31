@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Button, Card, Container, Alert } from 'react-bootstrap';
 import Cookies from 'js-cookie';
 import { prepareFile } from '../../api/fileManipulations';
-import { buyStorage } from '../../blockchain/chainCalls';
+import { Web3Context } from '../../blockchain/web3';
 
 const FileUpload = () => {
+    const { buyStorage } = useContext(Web3Context); 
     const [account, setAccount] = useState(null);
     const [error, setError] = useState(null);
     const [file, setFile] = useState(null);
@@ -45,9 +46,7 @@ const FileUpload = () => {
                 file.size,
                 file.name,
                 result.serverIds,
-                result.blockHashes,
-                result.id,
-                account
+                result.blockHashes
             );
 
             setError(null);

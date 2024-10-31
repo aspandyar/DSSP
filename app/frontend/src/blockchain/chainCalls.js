@@ -68,6 +68,10 @@ async function getFileMetadata(id) {
 }
 
 async function buyStorage(size, name, serverIds, blockHashes, id, fromAddress) {
+    if (typeof window.ethereum === 'undefined') {
+        throw new Error('MetaMask is not installed. Please install it to use this feature.');
+    }
+
     try {
         const fileMetadata = {
             id: 0,
@@ -81,6 +85,14 @@ async function buyStorage(size, name, serverIds, blockHashes, id, fromAddress) {
         const pricePerByte = await StorageSharing.methods.priceInWeiPerByte().call();
         const totalCost = size * Number(pricePerByte);
 
+        const confirmMessage = `You are about to pay ${totalCost / 1e18} ETH for storage. Do you want to proceed?`;
+        const userConfirmed = window.confirm(confirmMessage);
+
+        if (!userConfirmed) {
+            console.log("Transaction cancelled by user.");
+            return;
+        }
+
         const tx = await StorageSharing.methods.buyStorage(fileMetadata).send({ 
             from: fromAddress, 
             value: totalCost 
@@ -90,6 +102,16 @@ async function buyStorage(size, name, serverIds, blockHashes, id, fromAddress) {
         throw error;
     }
 }
+
+module.exports = {
+    publishServer,
+    listServers,
+    getServer,
+    listFiles,
+    getFileMetadata,
+    buyStorage
+};
+
 
 module.exports = {
     publishServer,
