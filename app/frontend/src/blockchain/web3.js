@@ -1,7 +1,8 @@
-import React, { createContext, useEffect, useState } from 'react';
-import Web3 from 'web3';
-import contractABI from './StorageSharing.json';
-import * as chainCalls from './chainCalls';
+import React, { createContext, useEffect, useState } from "react";
+import Web3 from "web3";
+import contractABI from "./StorageSharing.json";
+
+import Cookies from "js-cookie";
 
 const Web3Context = createContext();
 
@@ -9,109 +10,176 @@ const Web3Provider = ({ children }) => {
   const [web3, setWeb3] = useState(null);
   const [account, setAccount] = useState(null);
   const [contract, setContract] = useState(null);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     const initWeb3 = async () => {
       if (window.ethereum) {
         try {
-          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-          setAccount(accounts[0]);
+          // const accounts = await window.ethereum.request({
+          //   method: "eth_requestAccounts",
+          // });
+          // setAccount(accounts[0]);
+          setAccount(Cookies.get("account"))
+
 
           const web3Instance = new Web3(window.ethereum);
           setWeb3(web3Instance);
 
           const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
-          const contractInstance = new web3Instance.eth.Contract(contractABI.abi, contractAddress);
+          const contractInstance = new web3Instance.eth.Contract(
+            contractABI.abi,
+            contractAddress
+          );
           setContract(contractInstance);
 
-          window.ethereum.on('accountsChanged', (accounts) => {
+          window.ethereum.on("accountsChanged", (accounts) => {
             setAccount(accounts[0] || null);
           });
 
-          window.ethereum.on('chainChanged', () => {
-            window.location.reload();
-          });
+          // window.ethereum.on('chainChanged', () => {
+          //   window.location.reload();
+          // });
         } catch (err) {
-          setError(`Error initializing Web3: ${err.message}`);
+          throw new Error(`Error initializing Web3: ${err.message}`);
         }
       } else {
-        setError('No MetaMask found. Make sure it is installed.');
+        throw new Error("No MetaMask found. Make sure it is installed.");
       }
     };
 
     initWeb3();
   }, []);
 
-  const handleBuyStorage = async (size, name, serverIds, blockHashes) => {
+  const buyStorage = async (size, name, serverIds, blockHashes) => {
+    console.log("account", account) 
+
+    if (!contract || !account)
+      throw new Error("Contract or account not initialized.");
+
     try {
-      return await chainCalls.buyStorage(contract, account, size, name, serverIds, blockHashes);
+      const pricePerByte = await contract.methods.priceInWeiPerByte().call();
+
+      const totalCost = (BigInt(size) * BigInt(pricePerByte)).toString();
+
+      const fileMetadata = {
+        id: 0,
+        size,
+        name,
+        serverIds,
+        blockHashes,
+        user: account,
+      };
+
+      const response = await contract.methods
+        .buyStorage(fileMetadata)
+        .send({ from: account, value: totalCost });
+
+      
+
+        console.log(response)
+
+      return response.transactionHash;
     } catch (error) {
-      setError(`Error buying storage: ${error.message}`);
+      console.error("Error buying storage:", error);
       throw error;
     }
   };
 
-  const handlePublishServer = async (socket) => {
+  const publishServer = async (socket) => {
+    if (!contract || !account)
+      throw new Error("Contract or account not initialized.");
+
     try {
-      return await chainCalls.publishServer(contract, account, socket);
+      const tx = await contract.methods
+        .publishServer(socket)
+        .send({ from: account });
+      return tx.transactionHash;
     } catch (error) {
-      setError(`Error publishing server: ${error.message}`);
+      console.error("Error publishing server:", error);
       throw error;
     }
   };
 
-  const handleListServers = async () => {
+  const listServers = async () => {
+    if (!contract) throw new Error("Contract not initialized.");
+
     try {
-      return await chainCalls.listServers(contract);
+      const servers = await contract.methods.listServers().call();
+      return servers;
     } catch (error) {
-      setError(`Error listing servers: ${error.message}`);
+      console.error("Error listing servers:", error);
       throw error;
     }
   };
 
-  const handleGetServer = async (id) => {
+  const getServer = async (id) => {
+    if (!contract) throw new Error("Contract not initialized.");
+
     try {
-      return await chainCalls.getServer(contract, id);
+      const server = await contract.methods.getServer(id).call();
+      return server;
     } catch (error) {
-      setError(`Error getting server: ${error.message}`);
+      console.error("Error getting server:", error);
       throw error;
     }
   };
 
-  const handleListFiles = async (userAddress) => {
+  const listFiles = async (userAddress) => {
+    if (!contract || !account)
+      throw new Error("Contract or account not initialized.");
+
     try {
-      return await chainCalls.listFiles(contract, account, userAddress);
+      const files = await contract.methods
+        .listFileMetadatas(userAddress)
+        .call({ from: account });
+      return files.map((file) => ({
+        id: file.id.toString(),
+        size: file.size.toString(),
+        serverIds: file.serverIds.map((id) => id.toString()),
+        blockHashes: file.blockHashes.map((hash) => hash.toString()),
+        name: file.name,
+        user: file.user,
+      }));
     } catch (error) {
-      setError(`Error listing files: ${error.message}`);
+      console.error("Error listing files:", error);
       throw error;
     }
   };
 
-  const handleGetFileMetadata = async (id) => {
+  const getFileMetadata = async (id) => {
+    if (!contract) throw new Error("Contract not initialized.");
+
     try {
-      return await chainCalls.getFileMetadata(contract, id);
+      const file = await contract.methods.getFileMetadata(id).call();
+      return {
+        id: file.id.toString(),
+        size: file.size.toString(),
+        serverIds: file.serverIds.map((id) => id.toString()),
+        blockHashes: file.blockHashes.map((hash) => hash.toString()),
+        name: file.name,
+        user: file.user,
+      };
     } catch (error) {
-      setError(`Error getting file metadata: ${error.message}`);
+      console.error("Error getting file metadata:", error);
       throw error;
     }
   };
 
   return (
-    <Web3Context.Provider value={{ 
-      web3, 
-      account, 
-      contract, 
-      buyStorage: handleBuyStorage, 
-      publishServer: handlePublishServer, 
-      listServers: handleListServers, 
-      getServer: handleGetServer, 
-      listFiles: handleListFiles, 
-      getFileMetadata: handleGetFileMetadata, 
-      error 
-    }}>
+    <Web3Context.Provider
+      value={{
+        web3,
+        account,
+        contract,
+        buyStorage,
+        publishServer,
+        listServers,
+        getServer,
+        listFiles,
+        getFileMetadata,
+      }}
+    >
       {children}
-      {error && <div className="error-message">{error}</div>}
     </Web3Context.Provider>
   );
 };
