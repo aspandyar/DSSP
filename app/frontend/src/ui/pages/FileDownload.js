@@ -3,6 +3,7 @@ import { Button, Card, Container, ListGroup, Alert, Row, Col } from "react-boots
 import Cookies from "js-cookie";
 import { Web3Context } from "../../blockchain/web3";
 import { downloadFile } from '../../api/fileManipulations';
+import { decryptData } from '../../services/fileProtection';
 
 const FileDownload = () => {
   const { listServers, listFiles } = useContext(Web3Context);
@@ -38,13 +39,29 @@ const FileDownload = () => {
     }
   };
 
-  const handleDownload = async (file) => {
+  const handleDownloadDecryptedFile = async (file) => {
     try {
-      await downloadFile(file.id, file.name);
+        const encryptedBlob = await downloadFile(file.id);
+        const arrayBuffer = await encryptedBlob.arrayBuffer();
+        const encryptedData = new Uint8Array(arrayBuffer);
+
+        const encryptedDataString = String.fromCharCode(...encryptedData);
+        const decryptedData = decryptData(encryptedDataString, account);
+
+        const blob = new Blob([decryptedData], { type: 'application/octet-stream' });
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = file.name; 
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     } catch (error) {
-      setError("Failed to download file. Please try again.");
+        console.error("Error during file download:", error);
+        setError("Error: Failed to decrypt or download file: " + error.message);
     }
-  };
+};
+
+  
 
   return (
     <Container className="text-center">
@@ -71,7 +88,7 @@ const FileDownload = () => {
                   <Card.Text>
                     <strong>Owners:</strong> {file.owners.join(", ")}
                   </Card.Text>
-                  <Button variant="success" onClick={() => handleDownload(file)} className="mt-2">
+                  <Button variant="success" onClick={() => handleDownloadDecryptedFile(file)} className="mt-2">
                     Download
                   </Button>
                 </Card.Body>

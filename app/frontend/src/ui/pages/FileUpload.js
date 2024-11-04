@@ -3,6 +3,7 @@ import { Button, Card, Container, Alert } from 'react-bootstrap';
 import Cookies from 'js-cookie';
 import { prepareFile, uploadFile } from '../../api/fileManipulations';
 import { Web3Context } from '../../blockchain/web3';
+import { encryptData } from '../../services/fileProtection';
 
 const FileUpload = () => {
     const { buyStorage } = useContext(Web3Context); 
@@ -23,7 +24,40 @@ const FileUpload = () => {
     }, []);
 
     const handleFileChange = (event) => {
-        setFile(event.target.files[0]);
+        const fileRaw = event.target.files[0]; 
+    
+        if (!fileRaw) {
+            setError("Error: No file selected.");
+            return;
+        }
+    
+        const reader = new FileReader();
+    
+        reader.onload = (loadEvent) => {
+            try {
+                const fileData = loadEvent.target.result;
+                const encryptedFileData = encryptData(fileData, account);
+                
+                const encryptedBlob = new Blob([encryptedFileData], { type: 'application/octet-stream' });
+                
+                setFile({
+                    name: fileRaw.name,
+                    size: fileRaw.size,
+                    blob: encryptedBlob,
+                });
+                setError(null);
+            } catch (error) {
+                console.log(error);
+                setError("Error: Failed to encrypt file: " + error.message);
+            }
+        };
+    
+        reader.onerror = (error) => {
+            console.log(error);
+            setError("Error: Failed to read file: " + error.message);
+        };
+    
+        reader.readAsArrayBuffer(fileRaw);
     };
 
     const handleUpload = async () => {
@@ -40,7 +74,7 @@ const FileUpload = () => {
         }
 
         try {
-            const result = await prepareFile(file);
+            const result = await prepareFile(file.blob); // Pass the Blob instead of the raw data
 
             const chainResponse = await buyStorage(
                 file.size,
@@ -49,7 +83,7 @@ const FileUpload = () => {
                 result.blockHashes
             );
 
-            await uploadFile(file);
+            await uploadFile(file.blob); // Upload the Blob
 
             setError(null);
             setShowError(false);

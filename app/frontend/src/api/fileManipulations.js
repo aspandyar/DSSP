@@ -66,34 +66,24 @@ const uploadFile = async (file) => {
   }
 };
 
-const downloadFile = async (fileId, fileName) => {
+const downloadFile = async (fileId) => {
   try {
-    const response = await fetch(
-      `http://127.0.0.1:3000/api/server/downloadFile/${fileId}`,
-      {
-        method: "GET",
+      const response = await fetch(`http://127.0.0.1:3000/api/server/downloadFile/${fileId}`, {
+          method: "GET",
+      });
+
+      if (!response.ok) {
+          throw new Error(`Error downloading file: ${response.status} ${response.statusText}`);
       }
-    );
 
-    if (!response.ok) {
-      throw new Error(
-        `Error downloading file: ${response.status} ${response.statusText}`
-      );
-    }
-
-    const blob = await response.blob();
-    const downloadUrl = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = downloadUrl;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.URL.revokeObjectURL(downloadUrl);
+      const blob = await response.blob();
+      return blob;
   } catch (error) {
-    console.error("Download failed:", error);
-    throw new Error("downloadFile: " + error.message);
+      console.error("Download failed:", error);
+      throw new Error("downloadFile: " + error.message);
   }
 };
+
+
 
 export { prepareFile, uploadFile, downloadFile };
