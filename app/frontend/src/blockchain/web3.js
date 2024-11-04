@@ -19,8 +19,7 @@ const Web3Provider = ({ children }) => {
           //   method: "eth_requestAccounts",
           // });
           // setAccount(accounts[0]);
-          setAccount(Cookies.get("account"))
-
+          setAccount(Cookies.get("account"));
 
           const web3Instance = new Web3(window.ethereum);
           setWeb3(web3Instance);
@@ -51,7 +50,7 @@ const Web3Provider = ({ children }) => {
   }, []);
 
   const buyStorage = async (size, name, serverIds, blockHashes) => {
-    console.log("account", account) 
+    console.log("account", account);
 
     if (!contract || !account)
       throw new Error("Contract or account not initialized.");
@@ -73,10 +72,7 @@ const Web3Provider = ({ children }) => {
       const response = await contract.methods
         .buyStorage(fileMetadata)
         .send({ from: account, value: totalCost });
-
-      
-
-        console.log(response)
+      console.log(response);
 
       return response.transactionHash;
     } catch (error) {

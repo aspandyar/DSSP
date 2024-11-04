@@ -50,5 +50,5 @@ app.get("/status", status);
 app.post("/uploadBlock", upload.single("block"), uploadBlock);
 app.get("/downloadBlock/:hash", downloadBlock);
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3002;
 app.listen(port, () => console.log(`Server running on port ${port}`));

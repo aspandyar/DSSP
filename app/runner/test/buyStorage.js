@@ -3,7 +3,7 @@ require("dotenv").config();
 const fs = require("fs");
 const { storageContract } = require("../config/web3");
 
-const publicKey = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
+const publicKey = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"; // user account
 
 const buyStorage = async (fileMetadata) => {
 
